@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 antialiased;
+}
+
+::selection {
+  @apply bg-brand-500/30 text-ink-900;
+}
+
+/* Visible keyboard focus everywhere, respecting the brand accent */
+:focus-visible {
+  outline: 2px solid #ff9900;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #161616 25%, #242424 37%, #161616 63%);
+  background-size: 400% 100%;
+}
