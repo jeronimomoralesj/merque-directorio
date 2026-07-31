@@ -38,7 +38,11 @@ export default function DirectoryGrid({ salesmen }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+<<<<<<< HEAD
             placeholder="Busca por nombre o ciudad…"
+=======
+            placeholder="Search by name or location…"
+>>>>>>> 94bde8f (first all)
             className="w-full rounded-xl border border-ink-200 bg-white py-3 pl-11 pr-4 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500"
           />
         </div>
@@ -55,7 +59,11 @@ export default function DirectoryGrid({ salesmen }) {
           >
             {locations.map((loc) => (
               <option key={loc} value={loc}>
+<<<<<<< HEAD
                 {loc === 'all' ? 'Todas las ciudades' : loc}
+=======
+                {loc === 'all' ? 'All locations' : loc}
+>>>>>>> 94bde8f (first all)
               </option>
             ))}
           </select>
@@ -64,14 +72,24 @@ export default function DirectoryGrid({ salesmen }) {
 
       <div className="mt-4 flex items-center gap-2 text-sm text-ink-500">
         <Users size={16} className="text-brand-500" />
+<<<<<<< HEAD
         {filtered.length} {filtered.length === 1 ? 'representante' : 'representantes'} encontrados
+=======
+        {filtered.length} {filtered.length === 1 ? 'representative' : 'representatives'} found
+>>>>>>> 94bde8f (first all)
       </div>
 
       {filtered.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center rounded-2xl border border-dashed border-ink-200 bg-white py-16 text-center">
+<<<<<<< HEAD
           <p className="font-display text-lg text-ink-700">No hay resultados</p>
           <p className="mt-2 max-w-sm text-sm text-ink-500">
             Intenta otro nombre
+=======
+          <p className="font-display text-lg text-ink-700">No matches on the floor</p>
+          <p className="mt-2 max-w-sm text-sm text-ink-500">
+            Try a different name or clear the location filter — someone on the team is nearby.
+>>>>>>> 94bde8f (first all)
           </p>
         </div>
       ) : (

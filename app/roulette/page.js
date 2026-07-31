@@ -13,6 +13,7 @@ export default async function RoulettePage() {
   } = await supabase.auth.getUser();
 
   return (
+<<<<<<< HEAD
     <main className="relative min-h-screen overflow-hidden bg-ink-50 px-4 py-10 sm:py-16">
       {/* soft festive backdrop */}
       <div
@@ -44,8 +45,29 @@ export default async function RoulettePage() {
       </div>
 
       <div className="relative mx-auto mt-10 w-full max-w-2xl rounded-[2rem] border border-ink-200 bg-white p-4 shadow-xl shadow-ink-900/5 sm:mt-14 sm:p-8">
+=======
+    <main className="min-h-screen bg-ink-900 px-4 py-10 sm:py-16">
+      <div className="mx-auto max-w-lg text-center">
+        <div className="relative mx-auto h-14 w-14 overflow-hidden rounded-2xl bg-white p-2">
+          <Image src={LOGO_URL} alt="Merquellantas" fill className="object-contain" />
+        </div>
+        <h1 className="mt-5 font-display text-2xl text-white sm:text-3xl">
+          Booth Prize Wheel
+        </h1>
+        <p className="mt-2 text-sm text-ink-400">
+          Signed in as <span className="text-brand-500">{user?.email}</span>. Let your
+          booth visitor tap Spin!
+        </p>
+      </div>
+
+      <div className="mt-10">
+>>>>>>> 94bde8f (first all)
         <RouletteGame userEmail={user?.email} />
       </div>
     </main>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 94bde8f (first all)
