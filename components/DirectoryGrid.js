@@ -38,7 +38,7 @@ export default function DirectoryGrid({ salesmen }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or location…"
+            placeholder="Busca por nombre o ciudad…"
             className="w-full rounded-xl border border-ink-200 bg-white py-3 pl-11 pr-4 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500"
           />
         </div>
@@ -55,7 +55,7 @@ export default function DirectoryGrid({ salesmen }) {
           >
             {locations.map((loc) => (
               <option key={loc} value={loc}>
-                {loc === 'all' ? 'All locations' : loc}
+                {loc === 'all' ? 'Todas las ciudades' : loc}
               </option>
             ))}
           </select>
@@ -64,14 +64,14 @@ export default function DirectoryGrid({ salesmen }) {
 
       <div className="mt-4 flex items-center gap-2 text-sm text-ink-500">
         <Users size={16} className="text-brand-500" />
-        {filtered.length} {filtered.length === 1 ? 'representative' : 'representatives'} found
+        {filtered.length} {filtered.length === 1 ? 'representante' : 'representantes'} encontrados
       </div>
 
       {filtered.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center rounded-2xl border border-dashed border-ink-200 bg-white py-16 text-center">
-          <p className="font-display text-lg text-ink-700">No matches on the floor</p>
+          <p className="font-display text-lg text-ink-700">No hay resultados</p>
           <p className="mt-2 max-w-sm text-sm text-ink-500">
-            Try a different name or clear the location filter — someone on the team is nearby.
+            Intenta otro nombre
           </p>
         </div>
       ) : (
