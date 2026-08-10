@@ -19,6 +19,7 @@ create table if not exists public.salesmen (
   profile_views integer not null default 0,
   whatsapp_clicks integer not null default 0,
   role text not null default 'salesman' check (role in ('salesman', 'admin')),
+  photo_base64 text,
   created_at timestamptz not null default now()
 );
 
@@ -115,7 +116,14 @@ create policy "Authenticated can insert own spin log"
   to authenticated
   with check (salesman_email = auth.jwt() ->> 'email');
 
--- spin_logs: only admins can read the full feed.
+-- spin_logs: salesmen can read their own logs (needed to check per-contact spin history).
+drop policy if exists "Salesmen read own spin logs" on public.spin_logs;
+create policy "Salesmen read own spin logs"
+  on public.spin_logs for select
+  to authenticated
+  using (salesman_email = auth.jwt() ->> 'email');
+
+-- spin_logs: admins can read everything.
 drop policy if exists "Admins read spin logs" on public.spin_logs;
 create policy "Admins read spin logs"
   on public.spin_logs for select
@@ -200,6 +208,53 @@ $$;
 
 grant execute on function public.spin_and_award(uuid, integer, text) to authenticated;
 
+-- Track which contact each spin was awarded to.
+alter table public.spin_logs
+  add column if not exists contact_id uuid references public.contacts(id) on delete set null,
+  add column if not exists contact_name text;
+
+-- Rebuild spin_and_award to optionally record the contact.
+create or replace function public.spin_and_award(
+  p_prize_id uuid,
+  p_day_number integer,
+  p_salesman_email text,
+  p_contact_id uuid default null,
+  p_contact_name text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_column text;
+  v_current integer;
+begin
+  if p_day_number not in (1, 2, 3) then
+    raise exception 'Invalid day_number %', p_day_number;
+  end if;
+
+  v_column := 'day' || p_day_number || '_stock';
+
+  execute format('select %I from public.prizes where id = $1 for update', v_column)
+    into v_current
+    using p_prize_id;
+
+  if v_current is null or v_current <= 0 then
+    raise exception 'Prize % has no remaining stock for day %', p_prize_id, p_day_number;
+  end if;
+
+  execute format('update public.prizes set %I = %I - 1 where id = $1', v_column, v_column)
+    using p_prize_id;
+
+  insert into public.spin_logs (salesman_email, prize_won, day_number, contact_id, contact_name)
+  select p_salesman_email, prize_name, p_day_number, p_contact_id, p_contact_name
+  from public.prizes where id = p_prize_id;
+end;
+$$;
+
+grant execute on function public.spin_and_award(uuid, integer, text, uuid, text) to authenticated;
+
 -- ----------------------------------------------------------------------------
 -- Seed data (optional) — remove or edit before going live
 -- ----------------------------------------------------------------------------
@@ -210,6 +265,47 @@ grant execute on function public.spin_and_award(uuid, integer, text) to authenti
 --   ('$50 Gift Card', null, 5, 5, 5, 2),
 --   ('Free Tire Rotation', null, 15, 15, 15, 6),
 --   ('Grand Prize Tire Set', null, 1, 1, 1, 1);
+
+-- ----------------------------------------------------------------------------
+-- 4. contacts (CRM de convención — captura de leads y clientes)
+-- ----------------------------------------------------------------------------
+create table if not exists public.contacts (
+  id uuid primary key default gen_random_uuid(),
+  salesman_email text not null,
+  salesman_name text not null,
+  nombre text not null,
+  telefono text not null,
+  email text,
+  tipo text not null default 'lead' check (tipo in ('lead', 'cliente_existente')),
+  fecha date not null default current_date,
+  vehiculos text,
+  compras_habituales text[],
+  compras_otras text,
+  notas text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.contacts enable row level security;
+
+-- Salesmen can insert contacts that belong to them.
+drop policy if exists "Salesmen insert own contacts" on public.contacts;
+create policy "Salesmen insert own contacts"
+  on public.contacts for insert
+  to authenticated
+  with check (salesman_email = auth.jwt() ->> 'email');
+
+-- Salesmen read only their own contacts; admins read everything.
+drop policy if exists "Salesmen read contacts" on public.contacts;
+create policy "Salesmen read contacts"
+  on public.contacts for select
+  to authenticated
+  using (
+    salesman_email = auth.jwt() ->> 'email'
+    or exists (
+      select 1 from public.salesmen s
+      where s.email = auth.jwt() ->> 'email' and s.role = 'admin'
+    )
+  );
 
 -- After running this schema, create your first admin user:
 -- 1. Supabase Dashboard -> Authentication -> Add user (email + password)

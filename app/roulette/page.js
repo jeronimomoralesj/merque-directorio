@@ -2,20 +2,33 @@ import Image from 'next/image';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import RouletteGame from '@/components/RouletteGame';
 
-const LOGO_URL =
-  'https://www.merquellantas.com/assets/images/logo/Logo-Merquellantas.png';
+export const revalidate = 0;
 
-export default async function RoulettePage() {
+const LOGO_URL = 'https://www.merquellantas.com/assets/images/logo/Logo-Merquellantas.png';
+
+export default async function RoulettePage({ searchParams }) {
   // Middleware already guarantees a valid session reaches this far.
   const supabase = createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const sp = await searchParams;
+  const contactId = sp?.contactId ?? null;
+
+  // Fetch all contacts for this salesman (most recent first) for the picker.
+  const { data: contacts } = await supabase
+    .from('contacts')
+    .select('id, nombre, telefono, tipo')
+    .eq('salesman_email', user.email)
+    .order('created_at', { ascending: false });
+
+  // If a contactId is provided in the URL, pre-select that contact.
+  const selectedContact = contactId
+    ? (contacts ?? []).find(c => c.id === contactId) ?? null
+    : null;
 
   return (
-<<<<<<< HEAD
     <main className="relative min-h-screen overflow-hidden bg-ink-50 px-4 py-10 sm:py-16">
-      {/* soft festive backdrop */}
+      {/* Backdrop */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.5]"
         style={{
@@ -35,39 +48,21 @@ export default async function RoulettePage() {
         </span>
 
         <h1 className="mt-4 font-display text-3xl leading-tight text-ink-900 sm:text-4xl">
-          Booth Prize Wheel
+          Ruleta de Premios
         </h1>
         <p className="mx-auto mt-3 max-w-sm text-sm text-ink-500 sm:text-base">
-          Sesión iniciada como{' '}
-          <span className="font-medium text-brand-600">{user?.email}</span>. Deja que tu
-          visitante toque <span className="font-medium text-ink-900">Girar</span>.
+          Asesor:{' '}
+          <span className="font-medium text-brand-600">{user?.email}</span>
         </p>
       </div>
 
       <div className="relative mx-auto mt-10 w-full max-w-2xl rounded-[2rem] border border-ink-200 bg-white p-4 shadow-xl shadow-ink-900/5 sm:mt-14 sm:p-8">
-=======
-    <main className="min-h-screen bg-ink-900 px-4 py-10 sm:py-16">
-      <div className="mx-auto max-w-lg text-center">
-        <div className="relative mx-auto h-14 w-14 overflow-hidden rounded-2xl bg-white p-2">
-          <Image src={LOGO_URL} alt="Merquellantas" fill className="object-contain" />
-        </div>
-        <h1 className="mt-5 font-display text-2xl text-white sm:text-3xl">
-          Booth Prize Wheel
-        </h1>
-        <p className="mt-2 text-sm text-ink-400">
-          Signed in as <span className="text-brand-500">{user?.email}</span>. Let your
-          booth visitor tap Spin!
-        </p>
-      </div>
-
-      <div className="mt-10">
->>>>>>> 94bde8f (first all)
-        <RouletteGame userEmail={user?.email} />
+        <RouletteGame
+          userEmail={user?.email}
+          selectedContact={selectedContact}
+          contacts={contacts ?? []}
+        />
       </div>
     </main>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 94bde8f (first all)

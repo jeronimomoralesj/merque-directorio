@@ -8,11 +8,13 @@ import AnalyticsPanel from './AnalyticsPanel';
 import SpinLogFeed from './SpinLogFeed';
 import InventoryManager from './InventoryManager';
 import SalesmanManager from './SalesmanManager';
+import SalesmanList from './SalesManList';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'salesmen', label: 'Salesmen', icon: UserPlus },
+  { id: 'list', label: 'Lista', icon: UserPlus },
 ];
 
 export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
@@ -64,6 +66,7 @@ export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
       )}
 
       {tab === 'inventory' && <InventoryManager initialPrizes={prizes} />}
+      {tab === 'list' && <SalesmanList initialSalesmen={salesmen} />}
 
       {tab === 'salesmen' && (
         <SalesmanManager onCreated={() => router.refresh()} />

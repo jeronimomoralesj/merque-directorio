@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 import { notFound } from 'next/navigation';
 import { Mail, Phone, MapPin, BadgeCheck } from 'lucide-react';
-=======
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { ArrowLeft, Mail, Phone, MapPin } from 'lucide-react';
->>>>>>> 94bde8f (first all)
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,12 +8,15 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 export const revalidate = 0;
 
 export default async function SalesmanProfilePage({ params }) {
+  // Await params here to comply with newer Next.js patterns safely
+  const { id } = await params;
+  
   const supabase = createServerSupabaseClient();
 
   const { data: salesman } = await supabase
     .from('salesmen')
-    .select('id, name, email, phone, location, whatsapp_link')
-    .eq('id', params.id)
+    .select('id, name, email, phone, location, whatsapp_link, photo_base64')
+    .eq('id', id)
     .single();
 
   if (!salesman) {
@@ -44,8 +41,6 @@ export default async function SalesmanProfilePage({ params }) {
     <>
       <Navbar />
       <main className="flex-1 bg-ink-50">
-<<<<<<< HEAD
-        {/* Hero band: dot-grid texture + soft brand glow, card floats on top */}
         <div className="relative overflow-hidden bg-ink-900 pb-24 pt-14 sm:pb-32 sm:pt-20">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -65,15 +60,22 @@ export default async function SalesmanProfilePage({ params }) {
         </div>
 
         <div className="mx-auto -mt-20 max-w-2xl px-4 pb-16 sm:-mt-28 sm:px-6 sm:pb-24">
-          {/* Signature element: metallic-edged ID card */}
           <div className="rounded-[2rem] bg-gradient-to-br from-brand-500 via-brand-400/60 to-ink-200 p-[1.5px] shadow-2xl shadow-ink-900/20">
             <div className="overflow-hidden rounded-[calc(2rem-1.5px)] bg-white">
               <div className="flex flex-col items-center px-6 pb-8 pt-10 text-center sm:px-10">
                 <div className="relative">
                   <div className="absolute -inset-2 rounded-[1.4rem] bg-brand-500/60 opacity-70 blur-md" />
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.4rem] bg-ink-900 font-display text-3xl text-white ring-4 ring-white">
-                    {initials}
-                  </div>
+                  {salesman.photo_base64 ? (
+                    <img
+                      src={salesman.photo_base64}
+                      alt={salesman.name}
+                      className="relative h-24 w-24 rounded-[1.4rem] object-cover ring-4 ring-white"
+                    />
+                  ) : (
+                    <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.4rem] bg-ink-900 font-display text-3xl text-white ring-4 ring-white">
+                      {initials}
+                    </div>
+                  )}
                   <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white">
                     <BadgeCheck size={18} className="text-brand-500" strokeWidth={2.5} />
                   </span>
@@ -119,50 +121,10 @@ export default async function SalesmanProfilePage({ params }) {
               </div>
 
               <div className="border-t border-ink-100 bg-ink-50/60 px-6 py-6 sm:px-10">
-=======
-        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-16">
-          <div className="mt-6 overflow-hidden rounded-3xl border border-ink-200 bg-white">
-            <div className="bg-ink-900 px-6 py-10 text-center sm:px-10">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-500 font-display text-2xl text-ink-900">
-                {initials}
-              </div>
-              <h1 className="mt-5 font-display text-2xl text-white sm:text-3xl">
-                {salesman.name}
-              </h1>
-              <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-ink-300">
-                <MapPin size={14} className="text-brand-500" />
-                {salesman.location}
-              </p>
-            </div>
-
-            <div className="space-y-4 px-6 py-8 sm:px-10">
-              <div className="flex items-center gap-3 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3">
-                <Mail size={18} className="shrink-0 text-brand-500" />
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-ink-400">Email</p>
-                  <p className="truncate text-sm font-medium text-ink-900">{salesman.email}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3">
-                <Phone size={18} className="shrink-0 text-brand-500" />
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-ink-400">Phone</p>
-                  <p className="truncate text-sm font-medium text-ink-900">{salesman.phone}</p>
-                </div>
-              </div>
-
-              <div className="pt-4 text-center sm:text-left">
->>>>>>> 94bde8f (first all)
                 <WhatsAppButton
                   salesmanId={salesman.id}
                   whatsappLink={salesman.whatsapp_link}
                 />
-<<<<<<< HEAD
-                <p className="mt-3 text-center text-xs text-ink-400 sm:text-left">
-                  Respuesta habitual en minutos por WhatsApp
-                </p>
-=======
->>>>>>> 94bde8f (first all)
               </div>
             </div>
           </div>
@@ -171,8 +133,4 @@ export default async function SalesmanProfilePage({ params }) {
       <Footer />
     </>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 94bde8f (first all)

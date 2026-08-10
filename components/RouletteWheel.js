@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Alternating black / brand-orange wedges, white text, matches the requested palette.
 const WEDGE_COLORS = ['#0a0a0a', '#ff9900'];
+const LOSE_COLOR = '#4b5563';
 
 export default function RouletteWheel({ prizes, spinning, targetIndex, onSpinComplete }) {
   const canvasRef = useRef(null);
@@ -38,6 +38,7 @@ export default function RouletteWheel({ prizes, spinning, targetIndex, onSpinCom
     const radius = size / 2;
     ctx.clearRect(0, 0, size, size);
 
+    let prizeColorIdx = 0;
     prizes.forEach((prize, i) => {
       const startAngle = (i * sliceAngle * Math.PI) / 180;
       const endAngle = ((i + 1) * sliceAngle * Math.PI) / 180;
@@ -46,7 +47,7 @@ export default function RouletteWheel({ prizes, spinning, targetIndex, onSpinCom
       ctx.moveTo(radius, radius);
       ctx.arc(radius, radius, radius - 6, startAngle, endAngle);
       ctx.closePath();
-      ctx.fillStyle = WEDGE_COLORS[i % 2];
+      ctx.fillStyle = prize.isLose ? LOSE_COLOR : WEDGE_COLORS[prizeColorIdx++ % 2];
       ctx.fill();
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;

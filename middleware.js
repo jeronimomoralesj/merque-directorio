@@ -60,5 +60,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/roulette/:path*', '/admin/:path*'],
+  matcher: ['/roulette/:path*', '/admin/:path*', '/crm', '/crm/:path*'],
 };
