@@ -78,7 +78,7 @@ export default async function SalesmanProfilePage({ params }) {
         </div>
 
         {/* ── Contact card ── */}
-        <div className="mx-auto -mt-24 max-w-lg px-4 pb-16 sm:-mt-28 sm:px-6 sm:pb-24">
+        <div className="relative mx-auto -mt-24 max-w-lg px-4 pb-16 sm:-mt-28 sm:px-6 sm:pb-24">
           <div className="overflow-hidden rounded-3xl bg-white shadow-2xl shadow-ink-900/10 ring-1 ring-ink-900/5">
 
             {/* Email + Phone */}
