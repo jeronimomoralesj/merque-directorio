@@ -8,7 +8,7 @@ import AnalyticsPanel from './AnalyticsPanel';
 import SpinLogFeed from './SpinLogFeed';
 import InventoryManager from './InventoryManager';
 import SalesmanManager from './SalesmanManager';
-import SalesmanList from './SalesManList';
+import SalesmanList from './SalesmanList';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
