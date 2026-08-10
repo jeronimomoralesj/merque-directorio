@@ -7,7 +7,7 @@ import {
   UserPlus, BadgeCheck, Calendar, Phone, Mail, Car,
   ShoppingBag, FileText, ChevronDown, ChevronUp,
   Check, X, Loader2, LogOut, ClipboardList, Gift,
-  Share2, Copy, QrCode,
+  Share2, Copy, QrCode, Pencil,
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { createClient } from '@/lib/supabaseClient';
@@ -50,6 +50,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [filter, setFilter] = useState('all');
+  const [editingId, setEditingId] = useState(null);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profileUrl, setProfileUrl] = useState('');
@@ -97,37 +98,72 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
     }));
   }
 
+  function handleEdit(contact) {
+    setEditingId(contact.id);
+    setForm({
+      nombre: contact.nombre ?? '',
+      telefono: contact.telefono ?? '',
+      email: contact.email ?? '',
+      tipo: contact.tipo ?? 'lead',
+      fecha: contact.fecha ?? new Date().toISOString().split('T')[0],
+      vehiculos: contact.vehiculos ?? '',
+      compras_habituales: contact.compras_habituales ?? [],
+      compras_otras: contact.compras_otras ?? '',
+      notas: contact.notas ?? '',
+    });
+    setShowForm(true);
+    setErrorMsg('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     setErrorMsg('');
     const supabase = createClient();
     const nombre = form.nombre.trim();
-    const { data: inserted, error } = await supabase
-      .from('contacts')
-      .insert({
-        salesman_email: user.email,
-        salesman_name: salesmanName,
-        nombre,
-        telefono: form.telefono.trim(),
-        email: form.email.trim() || null,
-        tipo: form.tipo,
-        fecha: form.fecha,
-        vehiculos: form.vehiculos.trim() || null,
-        compras_habituales: form.compras_habituales,
-        compras_otras: form.compras_otras.trim() || null,
-        notas: form.notas.trim() || null,
-      })
-      .select('id')
-      .single();
-    if (error) {
-      setErrorMsg('Error al guardar el contacto. Intente nuevamente.');
-      setSubmitting(false);
-      return;
+    const payload = {
+      nombre,
+      telefono: form.telefono.trim(),
+      email: form.email.trim() || null,
+      tipo: form.tipo,
+      fecha: form.fecha,
+      vehiculos: form.vehiculos.trim() || null,
+      compras_habituales: form.compras_habituales,
+      compras_otras: form.compras_otras.trim() || null,
+      notas: form.notas.trim() || null,
+    };
+
+    let savedId = editingId;
+    if (editingId) {
+      const { error } = await supabase
+        .from('contacts')
+        .update(payload)
+        .eq('id', editingId)
+        .eq('salesman_email', user.email);
+      if (error) {
+        setErrorMsg('Error al actualizar el contacto. Intente nuevamente.');
+        setSubmitting(false);
+        return;
+      }
+    } else {
+      const { data: inserted, error } = await supabase
+        .from('contacts')
+        .insert({ salesman_email: user.email, salesman_name: salesmanName, ...payload })
+        .select('id')
+        .single();
+      if (error) {
+        setErrorMsg('Error al guardar el contacto. Intente nuevamente.');
+        setSubmitting(false);
+        return;
+      }
+      savedId = inserted.id;
     }
-    setLastSaved({ id: inserted.id, nombre });
+
+    setLastSaved({ id: savedId, nombre });
     setSuccessMsg('');
     setForm({ ...EMPTY_FORM });
+    setEditingId(null);
     setShowForm(false);
     await loadContacts();
     setSubmitting(false);
@@ -136,6 +172,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
   function handleCancel() {
     setShowForm(false);
     setErrorMsg('');
+    setEditingId(null);
     setForm({ ...EMPTY_FORM });
   }
 
@@ -236,7 +273,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
             className="space-y-5 rounded-2xl border border-ink-200 bg-white p-5 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg text-ink-900">Nuevo contacto</h2>
+              <h2 className="font-display text-lg text-ink-900">{editingId ? 'Editar contacto' : 'Nuevo contacto'}</h2>
               <button type="button" onClick={handleCancel} className="text-ink-400 hover:text-ink-900 transition-colors">
                 <X size={20} />
               </button>
@@ -389,7 +426,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
                 className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-brand-500 py-3 text-sm font-bold text-ink-900 transition-transform active:scale-[0.98] disabled:opacity-70"
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-                {submitting ? 'Guardando...' : 'Guardar contacto'}
+                {submitting ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Guardar contacto'}
               </button>
             </div>
           </form>
@@ -434,7 +471,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {filtered.map(c => <ContactCard key={c.id} contact={c} />)}
+              {filtered.map(c => <ContactCard key={c.id} contact={c} onEdit={handleEdit} />)}
             </div>
           )}
         </section>
@@ -510,7 +547,7 @@ function StatCard({ label, value, colorClass, icon: Icon }) {
   );
 }
 
-function ContactCard({ contact }) {
+function ContactCard({ contact, onEdit }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const isCliente = contact.tipo === 'cliente_existente';
@@ -573,13 +610,22 @@ function ContactCard({ contact }) {
               <p className="whitespace-pre-wrap text-sm text-ink-700">{contact.notas}</p>
             </DetailRow>
           )}
-          <button
-            onClick={() => router.push(`/roulette?contactId=${contact.id}`)}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-brand-500/40 bg-brand-500/10 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-500 hover:text-ink-900"
-          >
-            <Gift size={15} />
-            Girar ruleta para {contact.nombre}
-          </button>
+          <div className="mt-1 flex gap-2">
+            <button
+              onClick={() => onEdit(contact)}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-ink-200 py-2.5 text-sm font-semibold text-ink-600 transition-colors hover:border-ink-400 hover:bg-ink-50"
+            >
+              <Pencil size={14} />
+              Editar
+            </button>
+            <button
+              onClick={() => router.push(`/roulette?contactId=${contact.id}`)}
+              className="flex flex-[2] items-center justify-center gap-2 rounded-xl border border-brand-500/40 bg-brand-500/10 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-500 hover:text-ink-900"
+            >
+              <Gift size={15} />
+              Girar ruleta
+            </button>
+          </div>
         </div>
       )}
     </div>
