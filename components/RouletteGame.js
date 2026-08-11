@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Gift, Loader2, AlertTriangle, BadgeCheck,
-  UserPlus, ChevronLeft, Users, PlusCircle, Ban,
+  UserPlus, ChevronLeft, Users, PlusCircle, Ban, CalendarOff,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabaseClient';
-import { getConventionDay } from '@/lib/conventionDay';
+import { getConventionDay, isConventionDay, CONVENTION_START_DATE, CONVENTION_TOTAL_DAYS } from '@/lib/conventionDay';
 import RouletteWheel from './RouletteWheel';
 import VictoryModal from './VictoryModal';
 
@@ -28,6 +28,7 @@ export default function RouletteGame({ userEmail, selectedContact: initialContac
   const [contactSpins, setContactSpins] = useState([]);
   const [contactSpinsLoading, setContactSpinsLoading] = useState(initialContact != null);
 
+  const conventionActive = isConventionDay();
   const day = getConventionDay();
   const stockCol = STOCK_COLUMN[day];
 
@@ -150,6 +151,50 @@ export default function RouletteGame({ userEmail, selectedContact: initialContac
       setBusy(false);
       setTargetIndex(null);
     }
+  }
+
+  // ── Gate: only open on convention days ───────────────────────────────────
+  if (!conventionActive) {
+    const start = new Date(`${CONVENTION_START_DATE}T00:00:00`);
+    const today = new Date(); today.setHours(0, 0, 0, 0); start.setHours(0, 0, 0, 0);
+    const isBefore = today < start;
+    const feriaDays = Array.from({ length: CONVENTION_TOTAL_DAYS }, (_, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      return d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+    });
+    return (
+      <div className="mx-auto max-w-md py-10 text-center">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-ink-200 bg-ink-50 mb-5">
+          <CalendarOff size={32} className="text-ink-400" />
+        </div>
+        <h2 className="font-display text-2xl text-ink-900 mb-2">Ruleta cerrada</h2>
+        <p className="text-sm text-ink-500 mb-6">
+          {isBefore
+            ? 'La feria aún no ha comenzado. La ruleta estará disponible durante los siguientes días:'
+            : 'La feria ya finalizó. La ruleta estuvo disponible durante:'}
+        </p>
+        <div className="space-y-2 mb-6">
+          {feriaDays.map((label, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-xl border border-ink-200 bg-white px-4 py-3"
+            >
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-400">Día {i + 1}</span>
+              <span className="text-sm font-semibold text-ink-700 capitalize">{label}</span>
+            </div>
+          ))}
+        </div>
+        {isBefore && (
+          <p className="text-xs text-ink-400">
+            Vuelve el{' '}
+            <span className="font-semibold text-ink-600">
+              {new Date(`${CONVENTION_START_DATE}T00:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}
+            </span>{' '}
+            para participar.
+          </p>
+        )}
+      </div>
+    );
   }
 
   // ── Step 1: pick a contact ────────────────────────────────────────────────
