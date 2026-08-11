@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, UserPlus, LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { LayoutDashboard, Package, UserPlus, LogOut, ClipboardList } from 'lucide-react';
 import { createClient } from '@/lib/supabaseClient';
 import AnalyticsPanel from './AnalyticsPanel';
 import SpinLogFeed from './SpinLogFeed';
@@ -47,13 +48,22 @@ export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
           ))}
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-2 text-sm font-semibold text-ink-600 hover:border-brand-500 hover:text-brand-600"
-        >
-          <LogOut size={15} />
-          Log out
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/crm"
+            className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-2 text-sm font-semibold text-ink-600 hover:border-brand-500 hover:text-brand-600"
+          >
+            <ClipboardList size={15} />
+            CRM
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-2 text-sm font-semibold text-ink-600 hover:border-brand-500 hover:text-brand-600"
+          >
+            <LogOut size={15} />
+            Log out
+          </button>
+        </div>
       </div>
 
       {tab === 'overview' && (

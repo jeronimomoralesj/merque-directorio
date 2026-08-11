@@ -57,7 +57,7 @@ function LoginForm() {
 
     const nextParam = searchParams.get('next');
     const destination =
-      profile.role === 'admin' ? '/admin' : nextParam && nextParam.startsWith('/roulette') ? nextParam : '/roulette';
+      profile.role === 'admin' ? '/admin' : (nextParam ?? '/crm');
 
     router.push(destination);
     router.refresh();
