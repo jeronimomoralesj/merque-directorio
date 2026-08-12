@@ -22,9 +22,9 @@ export default async function AdminPage() {
       .order('prize_name'),
     supabase
       .from('spin_logs')
-      .select('id, salesman_email, prize_won, day_number, timestamp')
+      .select('id, salesman_email, prize_won, day_number, timestamp, contact_id, contact_name')
       .order('timestamp', { ascending: false })
-      .limit(50),
+      .limit(500),
   ]);
 
   return (

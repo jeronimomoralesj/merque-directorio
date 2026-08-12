@@ -3,19 +3,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Package, UserPlus, LogOut, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Package, UserPlus, LogOut, ClipboardList, Disc3 } from 'lucide-react';
 import { createClient } from '@/lib/supabaseClient';
 import AnalyticsPanel from './AnalyticsPanel';
 import SpinLogFeed from './SpinLogFeed';
 import InventoryManager from './InventoryManager';
 import SalesmanManager from './SalesmanManager';
 import SalesmanList from './SalesmanList';
+import RoulettePanel from './RoulettePanel';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'salesmen', label: 'Salesmen', icon: UserPlus },
   { id: 'list', label: 'Lista', icon: UserPlus },
+  { id: 'roulette', label: 'Ruleta', icon: Disc3 },
 ];
 
 export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
@@ -77,6 +79,7 @@ export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
 
       {tab === 'inventory' && <InventoryManager initialPrizes={prizes} />}
       {tab === 'list' && <SalesmanList initialSalesmen={salesmen} />}
+      {tab === 'roulette' && <RoulettePanel spinLogs={spinLogs} salesmen={salesmen} />}
 
       {tab === 'salesmen' && (
         <SalesmanManager onCreated={() => router.refresh()} />
