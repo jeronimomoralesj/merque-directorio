@@ -13,6 +13,7 @@ import QRCode from 'react-qr-code';
 import { createClient } from '@/lib/supabaseClient';
 
 const LOGO_URL = 'https://www.merquellantas.com/assets/images/logo/Logo-Merquellantas.png';
+const BASE_URL = 'https://merque-directorio.vercel.app';
 
 const CATEGORIAS = [
   'Llantas de pasajero',
@@ -56,7 +57,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
   const [profileUrl, setProfileUrl] = useState('');
 
   useEffect(() => {
-    if (salesmanId) setProfileUrl(`${window.location.origin}/salesman/${salesmanId}`);
+    if (salesmanId) setProfileUrl(`${BASE_URL}/salesman/${salesmanId}`);
   }, [salesmanId]);
 
   async function handleCopyLink() {
