@@ -11,7 +11,7 @@ export default async function AdminPage() {
   // Middleware already verified this user is authenticated and role === 'admin'.
   const supabase = createServerSupabaseClient();
 
-  const [{ data: salesmen }, { data: prizes }, { data: spinLogs }] = await Promise.all([
+  const [{ data: salesmen }, { data: prizes }, { data: spinLogs }, { data: contacts }] = await Promise.all([
     supabase
       .from('salesmen')
       .select('id, name, email, location, profile_views, whatsapp_clicks, role, photo_base64')
@@ -25,6 +25,9 @@ export default async function AdminPage() {
       .select('id, salesman_email, prize_won, day_number, timestamp, contact_id, contact_name')
       .order('timestamp', { ascending: false })
       .limit(500),
+    supabase
+      .from('contacts')
+      .select('id, salesman_email, salesman_name, tipo, fecha, created_at'),
   ]);
 
   return (
@@ -44,6 +47,7 @@ export default async function AdminPage() {
           salesmen={salesmen || []}
           prizes={prizes || []}
           spinLogs={spinLogs || []}
+          contacts={contacts || []}
         />
       </div>
     </main>

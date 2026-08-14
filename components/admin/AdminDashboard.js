@@ -20,7 +20,7 @@ const TABS = [
   { id: 'roulette', label: 'Ruleta', icon: Disc3 },
 ];
 
-export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
+export default function AdminDashboard({ salesmen, prizes, spinLogs, contacts }) {
   const [tab, setTab] = useState('overview');
   const router = useRouter();
 
@@ -71,7 +71,7 @@ export default function AdminDashboard({ salesmen, prizes, spinLogs }) {
       {tab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <AnalyticsPanel salesmen={salesmen} />
+            <AnalyticsPanel salesmen={salesmen} contacts={contacts} />
           </div>
           <SpinLogFeed initialLogs={spinLogs} />
         </div>
