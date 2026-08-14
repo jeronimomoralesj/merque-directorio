@@ -13,6 +13,7 @@ import VictoryModal from './VictoryModal';
 
 const STOCK_COLUMN = { 1: 'day1_stock', 2: 'day2_stock', 3: 'day3_stock' };
 const LOSE_SENTINEL = '__SIN_PREMIO__';
+const BLOCKED_EMAIL = 'mariaisabel.gonzalez@merquellantas.com';
 
 export default function RouletteGame({ userEmail, selectedContact: initialContact, contacts }) {
   const [selectedContact, setSelectedContact] = useState(initialContact ?? null);
@@ -98,7 +99,7 @@ export default function RouletteGame({ userEmail, selectedContact: initialContac
   }
 
   async function handleSpin() {
-    if (spinning || busy || availablePrizes.length === 0 || !selectedContact || !canSpin) return;
+    if (spinning || busy || availablePrizes.length === 0 || !selectedContact || !canSpin || userEmail === BLOCKED_EMAIL) return;
     setActionError('');
     setLostSpin(false);
     setTargetIndex(pickWeightedIndex());
@@ -193,6 +194,21 @@ export default function RouletteGame({ userEmail, selectedContact: initialContac
             para participar.
           </p>
         )}
+      </div>
+    );
+  }
+
+  // ── Gate: blocked salesman ────────────────────────────────────────────────
+  if (userEmail === BLOCKED_EMAIL) {
+    return (
+      <div className="mx-auto max-w-md py-10 text-center">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-red-200 bg-red-50 mb-5">
+          <Ban size={32} className="text-red-400" />
+        </div>
+        <h2 className="font-display text-2xl text-ink-900 mb-2">Acceso no disponible</h2>
+        <p className="text-sm text-ink-500">
+          No tienes permisos para usar la ruleta en este evento. Comunícate con un administrador si crees que esto es un error.
+        </p>
       </div>
     );
   }
