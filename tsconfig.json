@@ -8,14 +8,15 @@
     "incremental": true,
     "module": "esnext",
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",   // ✅ changed from "node"
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
 
+    // ❌ "baseUrl": "." was removed last step
     "paths": {
-      "@/*": ["./*"]   // ✅ Already correct! No change needed.
+      "@/*": ["./*"]
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
