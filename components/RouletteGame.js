@@ -13,7 +13,7 @@ import VictoryModal from './VictoryModal';
 
 const STOCK_COLUMN = { 1: 'day1_stock', 2: 'day2_stock', 3: 'day3_stock' };
 const LOSE_SENTINEL = '__SIN_PREMIO__';
-const BLOCKED_EMAIL = 'mariaisabel.gonzalez@merquellantas.com';
+const BLOCKED_EMAIL = '';
 
 export default function RouletteGame({ userEmail, selectedContact: initialContact, contacts }) {
   const [selectedContact, setSelectedContact] = useState(initialContact ?? null);

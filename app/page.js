@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import { createServerSupabaseClient } from '../lib/supabaseServer';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DirectoryGrid from '@/components/DirectoryGrid';

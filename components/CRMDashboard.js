@@ -7,7 +7,7 @@ import {
   UserPlus, BadgeCheck, Calendar, Phone, Mail, Car,
   ShoppingBag, FileText, ChevronDown, ChevronUp,
   Check, X, Loader2, LogOut, ClipboardList, Gift,
-  Share2, Copy, QrCode, Pencil,
+  Share2, Copy, QrCode, Pencil, StickyNote
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { createClient } from '@/lib/supabaseClient';
@@ -207,6 +207,12 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
                 Mi QR
               </button>
             )}
+            <a href='/crm/quiz'><button
+              className="flex items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-semibold text-ink-600 transition-colors hover:border-brand-500 hover:text-brand-600"
+            >
+              <StickyNote size={13} />
+              Quiz
+            </button></a>
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-semibold text-ink-600 transition-colors hover:border-brand-500 hover:text-brand-600"
@@ -618,13 +624,6 @@ function ContactCard({ contact, onEdit }) {
             >
               <Pencil size={14} />
               Editar
-            </button>
-            <button
-              onClick={() => router.push(`/roulette?contactId=${contact.id}`)}
-              className="flex flex-[2] items-center justify-center gap-2 rounded-xl border border-brand-500/40 bg-brand-500/10 py-2.5 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-500 hover:text-ink-900"
-            >
-              <Gift size={15} />
-              Girar ruleta
             </button>
           </div>
         </div>
