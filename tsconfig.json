@@ -14,8 +14,9 @@
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
 
-    "baseUrl": ".",
-    "paths": { "@/*": ["./*"] }
+    "paths": {
+      "@/*": ["./*"]   // ✅ Already correct! No change needed.
+    }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
