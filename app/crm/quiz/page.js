@@ -24,6 +24,7 @@ const CATEGORIAS = [
 const EMPTY_FORM = {
   nombre: '',
   telefono: '',
+  ciudad: '',
   email: '',
   tipo: 'lead',
   fecha: new Date().toISOString().split('T')[0],
@@ -407,6 +408,19 @@ function ContactForm({ form, setForm, toggleCategoria, submitting, submitError, 
           placeholder="Ej. Carlos Rodríguez"
           value={form.nombre}
           onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+          className={INPUT}
+        />
+      </div>
+
+      {/* Ciudad */}
+      <div>
+        <FieldLabel>Ciudad de empresa *</FieldLabel>
+        <input
+          type="text"
+          required
+          placeholder="Ej. Bogotá"
+          value={form.ciudad}
+          onChange={(e) => setForm((f) => ({ ...f, ciudad: e.target.value }))}
           className={INPUT}
         />
       </div>
