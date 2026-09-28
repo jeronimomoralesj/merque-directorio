@@ -275,6 +275,7 @@ create table if not exists public.contacts (
   salesman_name text not null,
   nombre text not null,
   telefono text not null,
+  ciudad text not null,
   email text,
   tipo text not null default 'lead' check (tipo in ('lead', 'cliente_existente')),
   fecha date not null default current_date,

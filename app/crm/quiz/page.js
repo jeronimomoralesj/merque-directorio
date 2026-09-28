@@ -113,6 +113,7 @@ export default function QuizPage() {
         nombre,
         telefono: form.telefono.trim(),
         email: form.email.trim() || null,
+        ciudad: form.ciudad,
         tipo: form.tipo,
         fecha: form.fecha,
         vehiculos: form.vehiculos.trim() || null,
