@@ -9,7 +9,7 @@ const MAX_IMAGES = 5;
 const MAX_MB = 5;
 
 const inputClass =
-  'w-full border border-slate-300 bg-white px-3 py-2 font-normal text-slate-900 placeholder:text-slate-400 focus:border-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-800/30';
+  'w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 font-normal text-slate-900 placeholder:text-slate-400 focus:border-[#F59E33] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E33]/40';
 
 export default function Upload() {
   const router = useRouter();
@@ -20,6 +20,11 @@ export default function Upload() {
   const [price, setPrice] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   // Free preview object URLs when they change / on unmount
   useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
@@ -96,24 +101,24 @@ export default function Upload() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-sky-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-800"
+        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#F59E33] px-5 py-3 font-semibold text-slate-900 shadow-md shadow-[#F59E33]/30 transition hover:bg-[#E68E1F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <Plus className="h-5 w-5" /> Agregar llanta
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 sm:items-center sm:p-4"
           onClick={() => !busy && setOpen(false)}
         >
           <form
             onSubmit={handleSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="grid max-h-[95vh] w-full max-w-lg gap-4 overflow-y-auto bg-slate-50 p-6 text-slate-900"
+            className="grid max-h-[95vh] w-full max-w-lg gap-4 overflow-y-auto rounded-t-3xl bg-white p-6 text-slate-900 sm:rounded-3xl"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">Nueva llanta</h2>
-              <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Cerrar" className="text-slate-500 hover:text-slate-900">
+              <h2 className="text-xl font-bold italic">Nueva llanta</h2>
+              <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Cerrar" className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-900">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -138,19 +143,19 @@ export default function Upload() {
               <div className="flex flex-wrap gap-2">
                 {files.map((f, i) => (
                   <div key={f.url} className="relative h-20 w-20">
-                    <img src={f.url} alt={`Imagen ${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={f.url} alt={`Imagen ${i + 1}`} className="h-full w-full rounded-xl object-cover" />
                     <button
                       type="button"
                       onClick={() => removeFile(i)}
                       aria-label={`Quitar imagen ${i + 1}`}
-                      className="absolute right-0.5 top-0.5 bg-slate-900 p-0.5 text-white hover:bg-red-700"
+                      className="absolute -right-1.5 -top-1.5 rounded-full bg-slate-900 p-0.5 text-white hover:bg-red-600"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
                 {files.length < MAX_IMAGES && (
-                  <label className="flex h-20 w-20 cursor-pointer items-center justify-center border-2 border-dashed border-slate-400 text-slate-500 hover:border-sky-800 hover:text-sky-800">
+                  <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400 hover:border-[#F59E33] hover:text-[#C26A00]">
                     <ImagePlus className="h-6 w-6" />
                     <input type="file" accept="image/*" multiple hidden onChange={addFiles} />
                   </label>
@@ -165,10 +170,10 @@ export default function Upload() {
             )}
 
             <div className="flex justify-end gap-2">
-              <button type="button" disabled={busy} onClick={() => setOpen(false)} className="border border-slate-900 px-5 py-2.5 font-semibold hover:bg-slate-200 disabled:opacity-50">
+              <button type="button" disabled={busy} onClick={() => setOpen(false)} className="rounded-2xl border border-slate-300 px-5 py-3 font-semibold hover:bg-slate-100 disabled:opacity-50">
                 Cancelar
               </button>
-              <button type="submit" disabled={busy} className="inline-flex items-center gap-2 bg-slate-900 px-5 py-2.5 font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="submit" disabled={busy} className="inline-flex items-center gap-2 rounded-2xl bg-[#F59E33] px-5 py-3 font-semibold text-slate-900 hover:bg-[#E68E1F] disabled:cursor-not-allowed disabled:opacity-50">
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 {busy ? 'Subiendo…' : 'Publicar'}
               </button>
