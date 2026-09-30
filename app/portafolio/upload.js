@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, ImagePlus, Loader2, CircleAlert } from 'lucide-react';
-import { createClient } from '@/lib/supabaseClient'; // adjust path to your lib
+import { Plus, X, ImagePlus, Loader2, CircleAlert, Percent } from 'lucide-react';
+import { createClient } from '@/lib/supabaseClient';
 
 const MAX_IMAGES = 5;
 const MAX_MB = 5;
@@ -11,13 +11,20 @@ const MAX_MB = 5;
 const inputClass =
   'w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 font-normal text-slate-900 placeholder:text-slate-400 focus:border-[#F59E33] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E33]/40';
 
+const onlyDigits = (v) => v.replace(/\D/g, '');
+const formatCOP = (v) => {
+  const digits = onlyDigits(v);
+  return digits ? Number(digits).toLocaleString('es-CO') : '';
+};
+
 export default function Upload() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [files, setFiles] = useState([]); // [{ file, url }]
+  const [files, setFiles] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [discount, setDiscount] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,7 +33,6 @@ export default function Upload() {
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
-  // Free preview object URLs when they change / on unmount
   useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
 
   function addFiles(e) {
@@ -45,12 +51,14 @@ export default function Upload() {
   }
 
   function reset() {
-    setFiles([]); setTitle(''); setDescription(''); setPrice(''); setError('');
+    setFiles([]); setTitle(''); setDescription(''); setPrice(''); setDiscount(false); setError('');
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (files.length === 0) return setError('Agrega al menos una imagen.');
+    const numericPrice = Number(onlyDigits(price));
+    if (!numericPrice) return setError('Ingresa un precio válido.');
     setBusy(true);
     setError('');
 
@@ -61,7 +69,6 @@ export default function Upload() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Debes iniciar sesión.');
 
-      // 1) Upload images in parallel to portfolio/<user_id>/<uuid>.<ext>
       const urls = await Promise.all(
         files.map(async ({ file }) => {
           const ext = file.name.split('.').pop().toLowerCase();
@@ -76,20 +83,19 @@ export default function Upload() {
         })
       );
 
-      // 2) Insert the row (first image = cover)
       const { error: insErr } = await supabase.from('tires').insert({
         title: title.trim(),
         description: description.trim(),
-        price: Number(price),
+        price: numericPrice,
+        discount,
         images: urls,
       });
       if (insErr) throw insErr;
 
       reset();
       setOpen(false);
-      router.refresh(); // re-run the server component to show the new tire
+      router.refresh();
     } catch (err) {
-      // Don't leave orphaned files if something failed
       if (uploadedPaths.length) await supabase.storage.from('portfolio').remove(uploadedPaths);
       setError(err.message || 'No se pudo guardar. Intenta de nuevo.');
     } finally {
@@ -130,8 +136,35 @@ export default function Upload() {
 
             <label className="grid gap-1 text-sm font-semibold">
               Precio (COP)
-              <input required type="number" min="0" step="1000" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="450000" className={inputClass} />
+              <input
+                required
+                type="text"
+                inputMode="numeric"
+                value={formatCOP(price)}
+                onChange={(e) => setPrice(onlyDigits(e.target.value))}
+                placeholder="450.000"
+                className={inputClass}
+              />
             </label>
+
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                <Percent className="h-4 w-4 text-[#C26A00]" />
+                Aplicar precio en súper descuento
+              </span>
+              <input
+                type="checkbox"
+                checked={discount}
+                onChange={(e) => setDiscount(e.target.checked)}
+                className="h-5 w-5 accent-[#F59E33]"
+              />
+            </label>
+            {discount && price && (
+              <p className="text-xs text-slate-500">
+                Se mostrará “Precio en súper descuento” y un precio original de{' '}
+                <strong>{formatCOP(String(Math.round(Number(onlyDigits(price)) * 1.13)))}</strong> (13% sobre el precio mostrado).
+              </p>
+            )}
 
             <label className="grid gap-1 text-sm font-semibold">
               Descripción

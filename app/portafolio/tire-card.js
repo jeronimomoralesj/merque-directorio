@@ -1,12 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Images, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { X, Images, ChevronLeft, ChevronRight, Eye, Pencil } from 'lucide-react';
+import EditTire from './edit'; // adjust path/name if different
 
 const money = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
 
-export default function TireCard({ tire }) {
+// original = price × 1.13  →  displayed price is 13% off the original
+const originalPrice = (price) => Math.round(price * 1.13);
+
+export default function TireCard({ tire, canEdit }) {
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [active, setActive] = useState(0);
   const images = tire.images ?? [];
 
@@ -29,6 +34,9 @@ export default function TireCard({ tire }) {
     };
   }, [open, images.length]);
 
+  const hasDiscount = !!tire.discount;
+  const original = hasDiscount ? originalPrice(Number(tire.price)) : null;
+
   return (
     <>
       <article className="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md md:flex-row">
@@ -43,6 +51,11 @@ export default function TireCard({ tire }) {
           )}
           {tire.isNew && (
             <span className="absolute left-5 top-5 rounded-full bg-rose-500 px-3 py-1 text-xs font-bold text-white">Nuevo</span>
+          )}
+          {hasDiscount && (
+            <span className="absolute right-5 top-5 rounded-full bg-[#F59E33] px-3 py-1 text-xs font-bold text-slate-900 shadow">
+              Súper descuento
+            </span>
           )}
           {images.length > 1 && (
             <span className="absolute bottom-5 right-5 inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-medium text-white">
@@ -59,15 +72,41 @@ export default function TireCard({ tire }) {
             {tire.description && (
               <p className="mt-2 line-clamp-2 max-w-prose text-slate-500">{tire.description}</p>
             )}
-            <p className="mt-4 text-3xl font-bold sm:text-4xl">{money.format(tire.price)}</p>
+
+            {hasDiscount ? (
+              <div className="mt-4">
+                <p className="text-sm font-bold uppercase tracking-wide text-rose-600">
+                  Precio en súper descuento
+                </p>
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <p className="text-3xl font-bold text-rose-600 sm:text-4xl">{money.format(tire.price)}</p>
+                  <p className="text-lg font-semibold text-slate-400 line-through">
+                    {money.format(original)}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-4 text-3xl font-bold sm:text-4xl">{money.format(tire.price)}</p>
+            )}
           </div>
 
-          <button
-            onClick={show}
-            className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#F59E33] px-6 py-3.5 font-semibold text-slate-900 shadow-md shadow-[#F59E33]/30 transition hover:bg-[#E68E1F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 lg:w-auto"
-          >
-            <Eye className="h-5 w-5" /> Ver detalles
-          </button>
+          <div className="flex w-full shrink-0 gap-2 lg:w-auto">
+            {canEdit && (
+              <button
+                onClick={() => setEditing(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3.5 font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                aria-label={`Editar ${tire.title}`}
+              >
+                <Pencil className="h-5 w-5" /> Editar
+              </button>
+            )}
+            <button
+              onClick={show}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#F59E33] px-6 py-3.5 font-semibold text-slate-900 shadow-md shadow-[#F59E33]/30 transition hover:bg-[#E68E1F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              <Eye className="h-5 w-5" /> Ver detalles
+            </button>
+          </div>
         </div>
       </article>
 
@@ -117,11 +156,32 @@ export default function TireCard({ tire }) {
               </button>
               <p className="mb-1 text-xs font-semibold tracking-wide text-[#C26A00]">Llantas</p>
               <h2 className="pr-10 text-2xl font-bold italic leading-tight">{tire.title}</h2>
-              <p className="my-4 text-3xl font-bold">{money.format(tire.price)}</p>
+
+              {hasDiscount ? (
+                <div className="my-4">
+                  <p className="text-sm font-bold uppercase tracking-wide text-rose-600">
+                    Precio en súper descuento
+                  </p>
+                  <div className="flex flex-wrap items-baseline gap-3">
+                    <p className="text-3xl font-bold text-rose-600">{money.format(tire.price)}</p>
+                    <p className="text-lg font-semibold text-slate-400 line-through">
+                      {money.format(original)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="my-4 text-3xl font-bold">{money.format(tire.price)}</p>
+              )}
+
               {tire.description && <p className="whitespace-pre-wrap leading-relaxed text-slate-600">{tire.description}</p>}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit modal */}
+      {editing && (
+        <EditTire tire={tire} onClose={() => setEditing(false)} />
       )}
     </>
   );

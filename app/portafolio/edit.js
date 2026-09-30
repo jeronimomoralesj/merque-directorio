@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, ImagePlus, Loader2, CircleAlert, Star, Trash2 } from 'lucide-react';
-import { createClient } from '@/lib/supabaseClient'; // adjust path to your lib
+import { X, ImagePlus, Loader2, CircleAlert, Star, Trash2, Percent } from 'lucide-react';
+import { createClient } from '@/lib/supabaseClient';
 
 const BUCKET = 'portfolio';
 const MAX_IMAGES = 5;
@@ -12,19 +12,25 @@ const MAX_MB = 5;
 const inputClass =
   'w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 font-normal text-slate-900 placeholder:text-slate-400 focus:border-[#F59E33] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F59E33]/40';
 
-// Public URL -> storage path (".../object/public/portfolio/<path>")
 function pathFromUrl(url) {
   const marker = `/${BUCKET}/`;
   const i = url.indexOf(marker);
   return i === -1 ? null : decodeURIComponent(url.slice(i + marker.length).split('?')[0]);
 }
 
+// Strip everything except digits (so "450.000" or "450,000" both work)
+const onlyDigits = (v) => v.replace(/\D/g, '');
+const formatCOP = (v) => {
+  const digits = onlyDigits(v);
+  return digits ? Number(digits).toLocaleString('es-CO') : '';
+};
+
 export default function EditTire({ tire, onClose }) {
   const router = useRouter();
   const [title, setTitle] = useState(tire.title);
   const [description, setDescription] = useState(tire.description ?? '');
-  const [price, setPrice] = useState(String(tire.price));
-  // Ordered list; existing = already uploaded, new = local file waiting to upload
+  const [price, setPrice] = useState(() => String(tire.price ?? ''));
+  const [discount, setDiscount] = useState(!!tire.discount);
   const [items, setItems] = useState(() =>
     (tire.images ?? []).map((url) => ({ id: url, url, file: null }))
   );
@@ -32,12 +38,10 @@ export default function EditTire({ tire, onClose }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState('');
 
-  // Revoke local preview URLs on unmount
   const itemsRef = useRef(items);
   itemsRef.current = items;
   useEffect(() => () => itemsRef.current.forEach((i) => i.file && URL.revokeObjectURL(i.url)), []);
 
-  // Lock page scroll + Esc to close
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && !busy && onClose();
     document.body.style.overflow = 'hidden';
@@ -80,6 +84,8 @@ export default function EditTire({ tire, onClose }) {
   async function handleSave(e) {
     e.preventDefault();
     if (items.length === 0) return setError('La llanta necesita al menos una imagen.');
+    const numericPrice = Number(onlyDigits(price));
+    if (!numericPrice) return setError('Ingresa un precio válido.');
     setBusy(true);
     setError('');
 
@@ -90,7 +96,6 @@ export default function EditTire({ tire, onClose }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Debes iniciar sesión.');
 
-      // 1) Upload only the new files; keep existing URLs as they are (order preserved)
       const finalUrls = await Promise.all(
         items.map(async ({ url, file }) => {
           if (!file) return url;
@@ -106,16 +111,20 @@ export default function EditTire({ tire, onClose }) {
         })
       );
 
-      // 2) Update the row
       const { data, error: updErr } = await supabase
         .from('tires')
-        .update({ title: title.trim(), description: description.trim(), price: Number(price), images: finalUrls })
+        .update({
+          title: title.trim(),
+          description: description.trim(),
+          price: numericPrice,
+          discount,
+          images: finalUrls,
+        })
         .eq('id', tire.id)
         .select('id');
       if (updErr) throw updErr;
       if (!data?.length) throw new Error('No se pudo actualizar. ¿Tienes permiso sobre esta llanta?');
 
-      // 3) Delete files of images that were removed
       const kept = new Set(finalUrls);
       const removed = (tire.images ?? []).filter((u) => !kept.has(u)).map(pathFromUrl).filter(Boolean);
       if (removed.length) await supabase.storage.from(BUCKET).remove(removed);
@@ -123,7 +132,7 @@ export default function EditTire({ tire, onClose }) {
       router.refresh();
       onClose();
     } catch (err) {
-      if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded); // no orphans
+      if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded);
       setError(err.message || 'No se pudo guardar. Intenta de nuevo.');
     } finally {
       setBusy(false);
@@ -173,8 +182,36 @@ export default function EditTire({ tire, onClose }) {
 
         <label className="grid gap-1 text-sm font-semibold">
           Precio (COP)
-          <input required type="number" min="0" step="1000" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} className={inputClass} />
+          <input
+            required
+            type="text"
+            inputMode="numeric"
+            value={formatCOP(price)}
+            onChange={(e) => setPrice(onlyDigits(e.target.value))}
+            placeholder="450.000"
+            className={inputClass}
+          />
         </label>
+
+        {/* Discount toggle */}
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Percent className="h-4 w-4 text-[#C26A00]" />
+            Aplicar precio en súper descuento
+          </span>
+          <input
+            type="checkbox"
+            checked={discount}
+            onChange={(e) => setDiscount(e.target.checked)}
+            className="h-5 w-5 accent-[#F59E33]"
+          />
+        </label>
+        {discount && (
+          <p className="text-xs text-slate-500">
+            Se mostrará “Precio en súper descuento” y un precio original de{' '}
+            <strong>{formatCOP(String(Math.round(Number(onlyDigits(price)) * 1.13)))}</strong> (13% sobre el precio mostrado).
+          </p>
+        )}
 
         <label className="grid gap-1 text-sm font-semibold">
           Descripción

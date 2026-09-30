@@ -74,7 +74,7 @@ export default function Gallery({ tires, canUpload }) {
         </div>
       ) : (
         <section className="grid gap-5">
-          {visible.map((tire) => <TireCard key={tire.id} tire={tire} />)}
+          {visible.map((tire) => <TireCard key={tire.id} tire={tire} canEdit={canUpload} />)}
         </section>
       )}
     </>
