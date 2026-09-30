@@ -35,7 +35,7 @@ export default function Upload() {
 
   useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
 
-  async function addFiles(e) {
+async function addFiles(e) {
   setError('');
   const incoming = Array.from(e.target.files || []);
   e.target.value = '';
@@ -45,7 +45,7 @@ export default function Upload() {
   );
   if (valid.length !== incoming.length) setError(`Solo imágenes de hasta ${MAX_MB} MB.`);
 
-  const room = MAX_IMAGES - items.length; // use `files` in upload.jsx
+  const room = MAX_IMAGES - files.length;
   if (valid.length > room) setError(`Máximo ${MAX_IMAGES} imágenes.`);
 
   // Snapshot bytes NOW so the file can't go stale later
@@ -53,17 +53,15 @@ export default function Upload() {
   const snapped = await Promise.all(
     kept.map(async (file) => {
       const buf = await file.arrayBuffer();
-      // A fresh File built from an in-memory buffer — immune to file changes
       const copy = new File([buf], file.name, {
         type: file.type || 'image/jpeg',
         lastModified: Date.now(),
       });
-      return { id: crypto.randomUUID(), url: URL.createObjectURL(copy), file: copy };
+      return { url: URL.createObjectURL(copy), file: copy };
     })
   );
 
-  setItems((prev) => [...prev, ...snapped]);   // in edit-tire.jsx
-  // setFiles((prev) => [...prev, ...snapped]); // in upload.jsx
+  setFiles((prev) => [...prev, ...snapped]);
 }
 
   function removeFile(i) {
