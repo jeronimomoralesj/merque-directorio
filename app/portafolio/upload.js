@@ -35,16 +35,36 @@ export default function Upload() {
 
   useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
 
-  function addFiles(e) {
-    setError('');
-    const incoming = Array.from(e.target.files || []);
-    e.target.value = '';
-    const valid = incoming.filter((f) => f.type.startsWith('image/') && f.size <= MAX_MB * 1024 * 1024);
-    if (valid.length !== incoming.length) setError(`Solo imágenes de hasta ${MAX_MB} MB.`);
-    const room = MAX_IMAGES - files.length;
-    if (valid.length > room) setError(`Máximo ${MAX_IMAGES} imágenes.`);
-    setFiles((prev) => [...prev, ...valid.slice(0, room).map((file) => ({ file, url: URL.createObjectURL(file) }))]);
-  }
+  async function addFiles(e) {
+  setError('');
+  const incoming = Array.from(e.target.files || []);
+  e.target.value = '';
+
+  const valid = incoming.filter(
+    (f) => f.type.startsWith('image/') && f.size <= MAX_MB * 1024 * 1024
+  );
+  if (valid.length !== incoming.length) setError(`Solo imágenes de hasta ${MAX_MB} MB.`);
+
+  const room = MAX_IMAGES - items.length; // use `files` in upload.jsx
+  if (valid.length > room) setError(`Máximo ${MAX_IMAGES} imágenes.`);
+
+  // Snapshot bytes NOW so the file can't go stale later
+  const kept = valid.slice(0, room);
+  const snapped = await Promise.all(
+    kept.map(async (file) => {
+      const buf = await file.arrayBuffer();
+      // A fresh File built from an in-memory buffer — immune to file changes
+      const copy = new File([buf], file.name, {
+        type: file.type || 'image/jpeg',
+        lastModified: Date.now(),
+      });
+      return { id: crypto.randomUUID(), url: URL.createObjectURL(copy), file: copy };
+    })
+  );
+
+  setItems((prev) => [...prev, ...snapped]);   // in edit-tire.jsx
+  // setFiles((prev) => [...prev, ...snapped]); // in upload.jsx
+}
 
   function removeFile(i) {
     setFiles((prev) => prev.filter((_, idx) => idx !== i));

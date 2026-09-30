@@ -52,19 +52,36 @@ export default function EditTire({ tire, onClose }) {
     };
   }, [busy, onClose]);
 
-  function addFiles(e) {
-    setError('');
-    const incoming = Array.from(e.target.files || []);
-    e.target.value = '';
-    const valid = incoming.filter((f) => f.type.startsWith('image/') && f.size <= MAX_MB * 1024 * 1024);
-    if (valid.length !== incoming.length) setError(`Solo imágenes de hasta ${MAX_MB} MB.`);
-    const room = MAX_IMAGES - items.length;
-    if (valid.length > room) setError(`Máximo ${MAX_IMAGES} imágenes.`);
-    setItems((prev) => [
-      ...prev,
-      ...valid.slice(0, room).map((file) => ({ id: crypto.randomUUID(), url: URL.createObjectURL(file), file })),
-    ]);
-  }
+  async function addFiles(e) {
+  setError('');
+  const incoming = Array.from(e.target.files || []);
+  e.target.value = '';
+
+  const valid = incoming.filter(
+    (f) => f.type.startsWith('image/') && f.size <= MAX_MB * 1024 * 1024
+  );
+  if (valid.length !== incoming.length) setError(`Solo imágenes de hasta ${MAX_MB} MB.`);
+
+  const room = MAX_IMAGES - items.length; // use `files` in upload.jsx
+  if (valid.length > room) setError(`Máximo ${MAX_IMAGES} imágenes.`);
+
+  // Snapshot bytes NOW so the file can't go stale later
+  const kept = valid.slice(0, room);
+  const snapped = await Promise.all(
+    kept.map(async (file) => {
+      const buf = await file.arrayBuffer();
+      // A fresh File built from an in-memory buffer — immune to file changes
+      const copy = new File([buf], file.name, {
+        type: file.type || 'image/jpeg',
+        lastModified: Date.now(),
+      });
+      return { id: crypto.randomUUID(), url: URL.createObjectURL(copy), file: copy };
+    })
+  );
+
+  setItems((prev) => [...prev, ...snapped]);   // in edit-tire.jsx
+  // setFiles((prev) => [...prev, ...snapped]); // in upload.jsx
+}
 
   function removeItem(id) {
     setItems((prev) => {
