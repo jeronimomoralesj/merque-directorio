@@ -12,7 +12,7 @@ const poppins = Poppins({
 export const metadata = { title: 'Portafolio | Merquellantas' };
 export const dynamic = 'force-dynamic';
 
-const LOGO = 'https://www.merquellantas.com/assets/images/logo/Logo-Merquellantas.png';
+const LOGO = 'https://merquellantas-navy.vercel.app/logo.jpeg';
 const NEW_DAYS = 14;
 
 export default async function PortafolioPage() {
@@ -36,7 +36,7 @@ export default async function PortafolioPage() {
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
           <a href="https://www.merquellantas.com" aria-label="Merquellantas">
-            <img src={LOGO} alt="Merquellantas" className="h-9 w-auto sm:h-11" />
+            <img src={LOGO} alt="Merquellantas" className="h-6 w-auto sm:h-9" />
           </a>
         </div>
       </header>
@@ -46,6 +46,8 @@ export default async function PortafolioPage() {
           <h1 className="text-3xl font-bold italic tracking-tight sm:text-4xl">Nuestro portafolio</h1>
           <p className="mt-1 text-slate-500">Llantas disponibles, con fotos reales y precio.</p>
         </div>
+
+        <img />
 
         {error ? (
           <p className="flex items-center gap-2 rounded-2xl bg-red-50 p-4 text-red-700">

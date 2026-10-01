@@ -428,7 +428,7 @@ function ContactForm({ form, setForm, toggleCategoria, submitting, submitError, 
 
       {/* Teléfono */}
       <div>
-        <FieldLabel>Teléfono *</FieldLabel>
+        <FieldLabel>Teléfono (o @ de whatasapp) *</FieldLabel>
         <input
           type="tel"
           required

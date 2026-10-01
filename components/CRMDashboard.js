@@ -353,9 +353,8 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
 
             {/* Teléfono */}
             <div>
-              <FieldLabel>Teléfono *</FieldLabel>
+              <FieldLabel>Teléfono (o @ de whatasapp) *</FieldLabel>
               <input
-                type="tel"
                 required
                 placeholder="Ej. 3101234567"
                 value={form.telefono}

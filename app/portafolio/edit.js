@@ -188,7 +188,7 @@ export default function EditTire({ tire, onClose }) {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold italic">Editar llanta</h2>
           <button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar" className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-900">
-            <X className="h-6 w-6" />
+            <X className="h-62 w-6" />
           </button>
         </div>
 
