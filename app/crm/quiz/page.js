@@ -26,6 +26,7 @@ const EMPTY_FORM = {
   telefono: '',
   ciudad: '',
   email: '',
+  empresa: '',
   tipo: 'lead',
   fecha: new Date().toISOString().split('T')[0],
   vehiculos: '',
@@ -114,6 +115,7 @@ export default function QuizPage() {
         telefono: form.telefono.trim(),
         email: form.email.trim() || null,
         ciudad: form.ciudad,
+        empresa: form.empresa,
         tipo: form.tipo,
         fecha: form.fecha,
         vehiculos: form.vehiculos.trim() || null,
@@ -447,6 +449,17 @@ function ContactForm({ form, setForm, toggleCategoria, submitting, submitError, 
           placeholder="Ej. carlos@email.com"
           value={form.email}
           onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+          className={INPUT}
+        />
+      </div>
+      
+      {/* Empresa */}
+      <div>
+        <FieldLabel>Correo electrónico (opcional)</FieldLabel>
+        <input
+          placeholder="Ej. Pepito transportes"
+          value={form.empresa}
+          onChange={(e) => setForm((f) => ({ ...f, empresa: e.target.value }))}
           className={INPUT}
         />
       </div>

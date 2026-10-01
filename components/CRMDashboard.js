@@ -7,7 +7,8 @@ import {
   UserPlus, BadgeCheck, Calendar, Phone, Mail, Car,
   ShoppingBag, FileText, ChevronDown, ChevronUp,
   Check, X, Loader2, LogOut, ClipboardList, Gift,
-  Share2, Copy, QrCode, Pencil, StickyNote
+  Share2, Copy, QrCode, Pencil, StickyNote,
+  Building2
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { createClient } from '@/lib/supabaseClient';
@@ -30,6 +31,7 @@ const EMPTY_FORM = {
   telefono: '',
   ciudad: '',
   email: '',
+  empresa: '',
   tipo: 'lead',
   fecha: new Date().toISOString().split('T')[0],
   vehiculos: '',
@@ -106,6 +108,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
       nombre: contact.nombre ?? '',
       telefono: contact.telefono ?? '',
       email: contact.email ?? '',
+      empresa: contact.empresa ?? '',
       ciudad: contact.ciudad?? '',
       tipo: contact.tipo ?? 'lead',
       fecha: contact.fecha ?? new Date().toISOString().split('T')[0],
@@ -130,6 +133,7 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
       telefono: form.telefono.trim(),
       email: form.email.trim() || null,
       ciudad: form.ciudad,
+      empresa: form.empresa,
       tipo: form.tipo,
       fecha: form.fecha,
       vehiculos: form.vehiculos.trim() || null,
@@ -375,6 +379,17 @@ export default function CRMDashboard({ user, salesmanName, salesmanId }) {
               />
             </div>
 
+            {/* Empresa */}
+            <div>
+              <FieldLabel>Empresa (opcional)</FieldLabel>
+              <input
+                placeholder="Ej. Pepito transportadores"
+                value={form.empresa}
+                onChange={e => setForm(f => ({ ...f, empresa: e.target.value }))}
+                className={INPUT}
+              />
+            </div>
+
             {/* Vehículos */}
             <div>
               <FieldLabel>Vehículos y medidas de llanta</FieldLabel>
@@ -591,10 +606,16 @@ function ContactCard({ contact, onEdit }) {
             </span>
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-ink-400">
-            <span className="flex items-center gap-1"><Phone size={10} />{contact.telefono}</span>
-            {contact.email && <span className="flex items-center gap-1"><Mail size={10} />{contact.email}</span>}
-            <span className="flex items-center gap-1"><Calendar size={10} />{contact.fecha}</span>
-          </div>
+          {contact.empresa && (
+            <span className="flex items-center gap-1">
+              <Building2 size={10} />
+              {contact.empresa}
+            </span>
+          )}
+          <span className="flex items-center gap-1"><Phone size={10} />{contact.telefono}</span>
+          {contact.email && <span className="flex items-center gap-1"><Mail size={10} />{contact.email}</span>}
+          <span className="flex items-center gap-1"><Calendar size={10} />{contact.fecha}</span>
+        </div>
         </div>
         <button
           onClick={() => setExpanded(e => !e)}
@@ -624,6 +645,11 @@ function ContactCard({ contact, onEdit }) {
           {contact.compras_otras && (
             <DetailRow icon={ShoppingBag} label="Otros productos">
               <p className="text-sm text-ink-700">{contact.compras_otras}</p>
+            </DetailRow>
+          )}
+          {contact.empresa && (
+            <DetailRow icon={Building2} label="Empresa">
+              <p className="text-sm text-ink-700">{contact.empresa}</p>
             </DetailRow>
           )}
           {contact.notas && (
